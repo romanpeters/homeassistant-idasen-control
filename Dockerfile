@@ -1,13 +1,10 @@
-FROM python:rc-slim
-
-RUN apt update && apt install -y git g++ make bluez \
-    libpango1.0-dev libgif-dev build-essential libxext-dev libxss-dev bluez
-
-RUN git clone https://github.com/rhyst/idasen-controller.git
-RUN pip3 install -r idasen-controller/requirements.txt
-
-RUN pip3 install Flask
-COPY main.py /root/main.py
-ENV FLASK_APP=/root/main.py
+FROM python:3.8
+MAINTAINER Roman Peters "info@romanpeters.nl"
+COPY . /app
+WORKDIR /app
+RUN pip install --no-cache-dir -U  -r idasen-controller/requirements.txt -r requirements.txt \
+    && apt-get update && apt-get -y install bluez bluetooth
 EXPOSE 10453
-CMD [ "flask", "run", "--host", "0.0.0.0", "--port", "10453" ]
+
+ENTRYPOINT sh docker_entrypoint.sh
+CMD ["python", "main.py"]
